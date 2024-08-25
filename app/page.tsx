@@ -20,19 +20,25 @@ export default function Home() {
       {role: 'user', content: message},
       {role: 'assistant', content: ''},
     ])
-  
-    const response = fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify([...messages, {role: 'user', content: message}]),
-    }).then(async (res) => {
-      const reader = res.body.getReader()
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([...messages, {role: 'user', content: message}]),
+      })
+
+      if (!response.body) {
+        throw new Error('No response body')
+      }
+
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let result = ''
-  
-      return reader.read().then(function processText({done, value}) {
+
+      const processText = async ({done, value}: {done: boolean, value?: Uint8Array}) => {
         if (done) {
           return result
         }
@@ -46,20 +52,30 @@ export default function Home() {
           ]
         })
         return reader.read().then(processText)
-      })
-    })
+      }
+
+      await reader.read().then(processText)
+
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      // Handle errors or notify user
+    }
   }
 
   const submitUrl = async () => {
     setUrl('')
-    // Send the URL to the backend
-    await fetch('/api/submit-url', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ url }),
-    })
+    try {
+      await fetch('/api/submit-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      })
+    } catch (error) {
+      console.error('Error submitting URL:', error)
+      // Handle errors or notify user
+    }
   }
 
   return (
@@ -121,8 +137,8 @@ export default function Home() {
           </Button>
         </Stack>
 
-                {/* New URL submission UI */}
-                <Stack direction={'row'} spacing={2}>
+        {/* New URL submission UI */}
+        <Stack direction={'row'} spacing={2}>
           <TextField
             label="Submit Professor URL"
             fullWidth
