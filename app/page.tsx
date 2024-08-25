@@ -38,7 +38,7 @@ export default function Home() {
       const decoder = new TextDecoder()
       let result = ''
 
-      const processText = async ({done, value}: {done: boolean, value?: Uint8Array}) => {
+      const processText = async ({done, value}: {done: boolean, value?: Uint8Array}): Promise<string> => {
         if (done) {
           return result
         }
@@ -51,6 +51,7 @@ export default function Home() {
             {...lastMessage, content: lastMessage.content + text},
           ]
         })
+        // Continue processing the next chunk
         return reader.read().then(processText)
       }
 
