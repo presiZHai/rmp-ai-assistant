@@ -11,6 +11,8 @@ export default function Home() {
     },
   ])
   const [message, setMessage] = useState('')
+  const [url, setUrl] = useState('')
+
   const sendMessage = async () => {
     setMessage('')
     setMessages((messages) => [
@@ -48,6 +50,18 @@ export default function Home() {
     })
   }
 
+  const submitUrl = async () => {
+    setUrl('')
+    // Send the URL to the backend
+    await fetch('/api/submit-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    })
+  }
+
   return (
     <Box
       width="100vw"
@@ -59,8 +73,8 @@ export default function Home() {
     >
       <Stack
         direction={'column'}
-        width="800px"
-        height="1000px"
+        width="700px"
+        height="900px"
         border="1px solid black"
         p={2}
         spacing={3}
@@ -104,6 +118,19 @@ export default function Home() {
           />
           <Button variant="contained" onClick={sendMessage}>
             Send
+          </Button>
+        </Stack>
+
+                {/* New URL submission UI */}
+                <Stack direction={'row'} spacing={2}>
+          <TextField
+            label="Submit Professor URL"
+            fullWidth
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <Button variant="contained" onClick={submitUrl}>
+            Submit
           </Button>
         </Stack>
       </Stack>
